@@ -1,0 +1,24 @@
+FROM alpine:3.16
+
+
+RUN sed -i 's/https/http/g' /etc/apk/repositories
+RUN apk add ca-certificates
+RUN apk add gawk
+RUN apk add openssl
+RUN awk --version
+
+RUN mkdir -p /usr/local/share/ca-certificates/extra
+ADD refresh-zscaler-certificates.sh .
+RUN sh ./refresh-zscaler-certificates.sh
+RUN ls -lisa /usr/local/share/ca-certificates/extra/*.crt
+
+RUN cat /usr/local/share/ca-certificates/extra/zscaler-cert1.crt >> /etc/ssl/certs/ca-certificates.crt
+RUN cat /usr/local/share/ca-certificates/extra/zscaler-cert2.crt >> /etc/ssl/certs/ca-certificates.crt
+RUN cat /usr/local/share/ca-certificates/extra/zscaler-cert3.crt >> /etc/ssl/certs/ca-certificates.crt
+
+#RUN cat /etc/ssl/certs/ca-certificates.crt 
+#RUN chmod 644 /etc/ssl/certs/ca-certificates.crt 
+#RUN update-ca-certificates
+
+RUN apk add curl 
+RUN curl -L -iv https://curl.haxx.se 

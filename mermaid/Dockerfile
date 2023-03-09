@@ -1,8 +1,13 @@
+FROM kb-alpine-certs:3.16 as certs
+
 FROM --platform=${TARGETPLATFORM:-linux/amd64} node:16.18-alpine3.16
+
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 RUN addgroup -g 1001 kroki && adduser -D -G kroki -u 1001 kroki
 
-RUN apk add --quiet --no-cache --update \
+RUN sed -i 's/https/http/g' /etc/apk/repositories
+RUN apk add --allow-untrusted --quiet --no-cache --update \
   chromium \
   font-noto-cjk
 

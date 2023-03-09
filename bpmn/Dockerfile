@@ -1,6 +1,9 @@
+FROM kb-alpine-certs:3.16 as certs
+
+
 # Package the Node.js project into a single binary
 FROM --platform=${TARGETPLATFORM:-linux/amd64} node:16.18.1-alpine3.16 as builder
-
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # Workaround: https://github.com/nodejs/docker-node/issues/813#issuecomment-407339011
 # Error: could not get uid/gid
 # [ 'nobody', 0 ]
@@ -23,7 +26,7 @@ RUN /usr/local/bin/pkg --targets ${NODE}-${PLATFORM}-$([ "$TARGETARCH" == "amd64
 
 # Create the image
 FROM --platform=${TARGETPLATFORM:-linux/amd64} alpine:3.16.3
-
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 RUN addgroup -g 1000 kroki && adduser -D -G kroki -u 1000 kroki
 
 RUN apk add --quiet --no-cache --update chromium
